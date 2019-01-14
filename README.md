@@ -1,4 +1,4 @@
-[![Sisters_logo](https://www.dabudabu.net/resources/Sisters-03.svg)](https://github.com/Chinachu/Mirakurun)
+![Sisters_logo](https://www.dabudabu.net/resources/Sisters-03.svg)
 
 # Sisters
 Node.jsで動作するビデオエンコードサーバー
