@@ -37,7 +37,7 @@ function httpServer(req, res) {
 
     console.log(req.url);
     console.log(__dirname + HTML_DIR_PATH);
-    if (req.url == "/") {
+    if (req.url == "/" || req.url == "/index.html") {
 
         fs.readFile (__dirname + HTML_DIR_PATH, 'UTF-8', function (err, data) {
             if(err) {
