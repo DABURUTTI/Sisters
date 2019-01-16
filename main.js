@@ -1,74 +1,53 @@
 "use strict";
 
-//moudles
-
 const http = require('http');
-const child_process = require(`child_process`);
-const fs = require('fs')
+const ffmpeg = require('fluent-ffmpeg');
 
-//Code
-
-var frame = 0;
+var progressnum = 0;
 
 let server = http.createServer(httpServer);
-child_process.exec("ffprobe -show_streams -hide_banner -print_format json 01.mp4", (error, stdout, stderr) => {
-    if (error) {
-        console.error(`[ERROR] ${error}`);
-        return;
-    }
-    let json = JSON.parse(stdout);
-
-    frame = json.streams[0].nb_frames;
-});
-
-child_process.exec("ffmpeg -i ./01.mp4 -y -nostdin -s 128x72 04.mp4 -f mpegts 1>output.txt 2>&1", (error, stdout, stderr) => {
-    if (error) {
-        console.error(`[ERROR] ${error}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}`);
-    console.log(`stderr: ${stderr}`);
-});
-
-server.listen("3000");
-
-function read(filePath) {
-    var content = new String();
-    if(check(filePath)) {;
-      content = fs.readFileSync(filePath, 'utf8');
-    }
-    return content;
-};
-
-function check(filePath) {
-    var isExist = false;
-    try {
-      fs.statSync(filePath);
-      isExist = true;
-    } catch(err) {
-      isExist = false;
-    }
-    return isExist;
-}
+server.listen('3030');
 
 function httpServer(req, res) {
-
-    if (req.url === '/favicon.ico') {
-
-        console.log("Deal");
+    if(req.url == '/favicon.ico') {
         res.end();
         return;
     }
 
-    let str = read("output.txt");
-    let result = str.match(/frame=\s*(\d*)\s/g);
+    if(req.url == '/start_encode') {
+        res.write("encodeStarting...");
 
-    console.log(result.length);
-    console.log(result[result.length-1]);
+        start_encode();
+        res.end("starting");
+        return;
+    }
 
-    let final = result[result.length-1];
-
-    console.log(final.match(/\d+/))
-    res.write((final.match(/\d+/)[0]/frame) * 100 + "%");
+    res.write(progressnum.toString());
     res.end();
+
+    return;
+}
+
+function start_encode() {
+    ffmpeg('/path/to/file.avi')
+        .videoCodec('libx264')
+        .audioCodec('libmp3lame')
+        .size('320x240')
+        .on('error', function(err) {
+            console.log('An error occurred: ' + err.message);
+        })
+
+        .on('end', function() {
+            console.log('Processing finished !');
+            progressnum = -1;
+        })
+
+        ffmpeg('/path/to/file.avi')
+        .on('progress', function(progress) {
+          console.log('Processing: ' + progress.percent + '% done');
+          progressnum = progress.percent;
+        })
+
+    .save('/path/to/output.mp4');
+
 }
