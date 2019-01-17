@@ -6,8 +6,14 @@ const http = require('http');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 
-const PATH_WEB_INDEX = '/html/index.html';
-const PATH_WEB_DIR = '/html';
+const PATH_WEB_INDEX = '/web/index.html';
+const PATH_WEB_DIR = '/web';
+
+//LOG colors
+
+const CL_RED   = '\u001b[31m';
+const CL_GREEN  = '\u001b[32m';
+
 
 var progressnum = 0;
 
@@ -36,7 +42,8 @@ function httpServer(req, res) {
 
     //静的ファイルの送信
 
-    console.log(__dirname + PATH_WEB_DIR + req.url);
+    console.log(req.method + ':' + req.url + ':' +  req.client.remoteAddress + ':' + (req.headers['user-agent'] || '-'));
+
     if (req.url == "/" || req.url == "/index.html") {
 
         fs.readFile (__dirname + PATH_WEB_INDEX, 'UTF-8', function (err, data) {
@@ -64,7 +71,6 @@ function httpServer(req, res) {
 
                 let ext = req.url.split('.').pop();
 
-                console.log("Type:" + ext );
                 switch(ext.toString()) {
 
                     case "png":
